@@ -6,11 +6,10 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        List<Bracket> brackets = new ArrayList<>();
+        List<SymbolWithPosition> symbols = new ArrayList<>();
         String input = "1+{2*{3+4}-6}-1-[1+[-1+2*(aaa)/2]/(10-[10-{a^2}])]";
 
-
-        boolean isValid = valid(input, brackets);
+        boolean isValid = valid(input, symbols);
         System.out.println(isValid ? "Valid" : "Not valid");
         if (!isValid){
             return;
@@ -22,21 +21,21 @@ public class Main {
             return;
         }
 
-        List<String> formattedResult = convertToStrings(brackets);
+        List<String> formattedResult = convertToStrings(symbols);
         for (String str : formattedResult) {
             System.out.println(str);
         }
     }
 
-    private static List<String> convertToStrings(List<Bracket> brackets) {
+    private static List<String> convertToStrings(List<SymbolWithPosition> symbols) {
         Vector<char[]> vector = new Vector<>();
-        for (Bracket br : brackets) {
+        for (SymbolWithPosition br : symbols) {
             if (vector.size() < br.getDepth() + 1) {
                 vector.setSize(br.getDepth() + 1);
             }
             char[] str = vector.get(br.getDepth());
             if (str == null) {
-                str = new char[brackets.size()];
+                str = new char[symbols.size()];
                 Arrays.fill(str, ' ');
                 vector.set(br.getDepth(), str);
             }
@@ -50,10 +49,10 @@ public class Main {
         return result;
     }
 
-    private static boolean valid(String st, List<Bracket> brackets) {
-        Stack<Bracket> stack = new Stack<>();
+    private static boolean valid(String st, List<SymbolWithPosition> symbols) {
+        Stack<SymbolWithPosition> stack = new Stack<>();
         for (int i = 0; i < st.length(); i++) {
-            Bracket br = new Bracket(st.charAt(i), i);
+            SymbolWithPosition br = new SymbolWithPosition(st.charAt(i), i);
 
             if (br.isBracket()) {
 
@@ -64,24 +63,24 @@ public class Main {
                         System.out.println("Unexpected closing bracket " + br.ch + " at " + br.sourceIndex);
                         return false;
                     }
-                    Bracket leftBr = stack.pop();
+                    SymbolWithPosition leftBr = stack.pop();
                     if (!br.isPair(leftBr)) {
                         System.out.println("Unpaired closing bracket " + br.ch + " at " + br.sourceIndex
                                 + " for opening bracket "+ leftBr.ch + " at " + leftBr.sourceIndex);
                         return false;
                     }
                     leftBr.setDepth(stack.size());
-                    brackets.add(leftBr);
+                    symbols.add(leftBr);
                     br.setDepth(stack.size());
-                    brackets.add(br);
+                    symbols.add(br);
                     System.out.println("Pair: " + leftBr.ch + " " + st.charAt(i) + " at: " + leftBr.sourceIndex + ", " + i);
                 }
 
             } else {
 //                System.out.println("Unexpected non-bracket symbol " + br.ch + " at " + br.sourceIndex);
-//                return false
+//                return false;
                 br.setDepth(stack.size());
-                brackets.add(br);
+                symbols.add(br);
             }
 
         }
@@ -89,7 +88,7 @@ public class Main {
         if (stack.empty()) {
             return true;
         }
-        Bracket leftBr = stack.pop();
+        SymbolWithPosition leftBr = stack.pop();
         System.out.println("Opening bracket " + leftBr.ch + " at " + leftBr.sourceIndex + " doesn't have its closing pair");
         return false;
     }
